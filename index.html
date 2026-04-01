@@ -1,0 +1,332 @@
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Lease PRO SaaS</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+<style>
+:root {
+    --bg:#f6f8fb;
+    --card:#fff;
+    --accent:#2563eb;
+    --text:#111827;
+    --muted:#6b7280;
+}
+
+*{box-sizing:border-box;font-family:Inter,sans-serif;}
+body{margin:0;background:var(--bg);}
+
+.wrapper{
+    display:grid;
+    grid-template-columns: 380px 1fr;
+    height:100vh;
+}
+
+.sidebar{
+    background:var(--card);
+    padding:20px;
+    border-right:1px solid #eee;
+    overflow:auto;
+}
+
+.main{
+    padding:20px;
+    overflow:auto;
+}
+
+h2{margin-top:0;}
+
+input,select{
+    width:100%;
+    padding:10px;
+    border-radius:10px;
+    border:1px solid #ddd;
+    margin-bottom:12px;
+}
+
+.card{
+    background:var(--card);
+    padding:20px;
+    border-radius:16px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.05);
+    margin-bottom:20px;
+}
+
+.big{
+    font-size:28px;
+    font-weight:600;
+    color:var(--accent);
+}
+
+.small{font-size:12px;color:var(--muted);}
+
+button{
+    padding:10px;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    margin-right:6px;
+}
+
+.primary{background:var(--accent);color:#fff;}
+.secondary{background:#e5e7eb;}
+
+.scenario-item{
+    padding:8px;
+    border:1px solid #eee;
+    border-radius:8px;
+    margin-bottom:6px;
+    cursor:pointer;
+}
+
+.insight{
+    padding:10px;
+    border-radius:10px;
+    background:#eef2ff;
+    font-size:13px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="wrapper">
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+<h2>Параметры</h2>
+
+<select id="scenario">
+<option value="base">Базовая</option>
+<option value="percent">% от оборота</option>
+<option value="hybrid">Гибрид</option>
+<option value="index">Индексация</option>
+</select>
+
+<input id="area" type="number" placeholder="Площадь" value="100">
+<input id="baseRate" type="number" placeholder="Ставка" value="1000">
+<input id="revenue" type="number" placeholder="Выручка" value="500000">
+<input id="percent" type="number" placeholder="% от выручки" value="5">
+<input id="years" type="number" placeholder="Срок" value="5">
+<input id="index" type="number" placeholder="Индекс %" value="5">
+
+<select id="floor"></select>
+<select id="category"></select>
+
+<input type="file" id="fileInput">
+
+<button class="primary" onclick="saveScenario()">Сохранить</button>
+<button class="secondary" onclick="resetAll()">Сброс</button>
+
+<h3>Сценарии</h3>
+<div id="saved"></div>
+
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+<div class="card">
+<div class="small">Ставка</div>
+<div class="big" id="rate">—</div>
+
+<div class="small">Аренда</div>
+<div class="big" id="rent">—</div>
+</div>
+
+<div class="card">
+<canvas id="chart"></canvas>
+</div>
+
+<div class="card">
+<div class="small">AI-инсайт</div>
+<div class="insight" id="insight"></div>
+</div>
+
+</div>
+
+</div>
+
+<script>
+let floorCoeffs={1:1.2,2:1};
+let categoryCoeffs={default:1};
+let chart;
+
+// init dropdowns
+function populate(){
+floor.innerHTML="";
+category.innerHTML="";
+
+Object.keys(floorCoeffs).forEach(k=>{
+floor.innerHTML+=`<option>${k}</option>`;
+});
+
+Object.keys(categoryCoeffs).forEach(k=>{
+category.innerHTML+=`<option>${k}</option>`;
+});
+}
+
+// calc
+function calc(){
+let area=+areaEl.value||0;
+let base=+baseRate.value||0;
+let revenue=+revenueEl.value||0;
+let percent=(+percentEl.value||0)/100;
+let years=+yearsEl.value||0;
+let index=(+indexEl.value||0)/100;
+
+let adj=base*(floorCoeffs[floor.value]||1)*(categoryCoeffs[category.value]||1);
+
+let rent=0;
+
+if(scenario.value==="base") rent=adj*area;
+if(scenario.value==="percent") rent=revenue*percent;
+if(scenario.value==="hybrid") rent=adj*area+revenue*percent;
+if(scenario.value==="index") rent=adj*area;
+
+rate.innerText=format(adj);
+rentEl.innerText=format(rent);
+
+// forecast
+let arr=[];
+let cur=rent;
+
+for(let i=1;i<=years;i++){
+if(scenario.value==="index") cur*=1+index;
+arr.push(cur);
+}
+
+drawChart(arr);
+generateInsight(adj,rent);
+}
+
+// chart
+function drawChart(data){
+if(chart) chart.destroy();
+
+chart=new Chart(document.getElementById("chart"),{
+type:"line",
+data:{
+labels:data.map((_,i)=>"Год "+(i+1)),
+datasets:[{data:data}]
+}
+});
+}
+
+// insight
+function generateInsight(rate,rent){
+let msg="";
+
+if(rate<800) msg="Ставка ниже рынка — потенциал роста";
+else if(rate>2000) msg="Высокая ставка — риск для арендатора";
+else msg="Ставка в рыночном диапазоне";
+
+insight.innerText=msg;
+}
+
+// save scenario
+function saveScenario(){
+let data={
+area:area.value,
+base:baseRate.value,
+revenue:revenue.value,
+percent:percent.value
+};
+
+let list=JSON.parse(localStorage.getItem("scenarios")||"[]");
+list.push(data);
+localStorage.setItem("scenarios",JSON.stringify(list));
+renderSaved();
+}
+
+// render saved
+function renderSaved(){
+let list=JSON.parse(localStorage.getItem("scenarios")||"[]");
+saved.innerHTML="";
+
+list.forEach(s=>{
+let div=document.createElement("div");
+div.className="scenario-item";
+div.innerText=`${s.area}м²`;
+div.onclick=()=>{
+area.value=s.area;
+baseRate.value=s.base;
+revenue.value=s.revenue;
+percent.value=s.percent;
+calc();
+};
+saved.appendChild(div);
+});
+}
+
+// export CSV
+function exportCSV(){
+let csv="rate,rent\n"+rate.innerText+","+rentEl.innerText;
+let blob=new Blob([csv]);
+let a=document.createElement("a");
+a.href=URL.createObjectURL(blob);
+a.download="data.csv";
+a.click();
+}
+
+// file load
+fileInput.addEventListener("change",e=>{
+let file=e.target.files[0];
+
+if(file.name.endsWith(".json")){
+let r=new FileReader();
+r.onload=ev=>{
+let d=JSON.parse(ev.target.result);
+floorCoeffs=d.floor_coefficients||floorCoeffs;
+categoryCoeffs=d.category_coefficients||categoryCoeffs;
+populate();
+};
+r.readAsText(file);
+}
+
+if(file.name.endsWith(".csv")){
+Papa.parse(file,{
+header:true,
+complete:res=>{
+res.data.forEach(r=>{
+if(r.type==="floor") floorCoeffs[r.key]=+r.value;
+if(r.type==="category") categoryCoeffs[r.key]=+r.value;
+});
+populate();
+}
+});
+}
+});
+
+// utils
+function format(n){
+return n.toLocaleString("ru-RU",{maximumFractionDigits:0});
+}
+
+function resetAll(){
+document.querySelectorAll("input").forEach(i=>i.value="");
+calc();
+}
+
+// refs
+const areaEl=area, baseRate=baseRate, revenueEl=revenue,
+percentEl=percent, yearsEl=years, indexEl=index,
+rentEl=rent;
+
+// init
+document.querySelectorAll("input,select").forEach(el=>{
+el.addEventListener("input",calc);
+});
+
+populate();
+renderSaved();
+calc();
+
+</script>
+
+</body>
+</html>
