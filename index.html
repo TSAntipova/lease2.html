@@ -1,332 +1,667 @@
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<title>Lease PRO SaaS</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Профессиональный калькулятор аренды коммерческой недвижимости</title>
+    <!-- PapaParse CDN для парсинга CSV -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+        body {
+            background: #f0f2f5;
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            padding: 2rem 1.5rem;
+            color: #1a2634;
+        }
 
-<style>
-:root {
-    --bg:#f6f8fb;
-    --card:#fff;
-    --accent:#2563eb;
-    --text:#111827;
-    --muted:#6b7280;
-}
+        .container {
+            max-width: 1440px;
+            margin: 0 auto;
+        }
 
-*{box-sizing:border-box;font-family:Inter,sans-serif;}
-body{margin:0;background:var(--bg);}
+        /* карточки */
+        .card {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.02), 0 2px 6px rgba(0,0,0,0.05);
+            padding: 1.75rem;
+            margin-bottom: 2rem;
+            transition: all 0.2s;
+            border: 1px solid #e9edf2;
+        }
 
-.wrapper{
-    display:grid;
-    grid-template-columns: 380px 1fr;
-    height:100vh;
-}
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
 
-.sidebar{
-    background:var(--card);
-    padding:20px;
-    border-right:1px solid #eee;
-    overflow:auto;
-}
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+            background: linear-gradient(135deg, #1e2a3a, #0f1722);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
 
-.main{
-    padding:20px;
-    overflow:auto;
-}
+        h3 {
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+            color: #2c3e4e;
+            border-left: 4px solid #3b82f6;
+            padding-left: 0.75rem;
+        }
 
-h2{margin-top:0;}
+        .grid-2col {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
 
-input,select{
-    width:100%;
-    padding:10px;
-    border-radius:10px;
-    border:1px solid #ddd;
-    margin-bottom:12px;
-}
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
 
-.card{
-    background:var(--card);
-    padding:20px;
-    border-radius:16px;
-    box-shadow:0 10px 25px rgba(0,0,0,0.05);
-    margin-bottom:20px;
-}
+        label {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-weight: 500;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            color: #4b5e6c;
+            margin-bottom: 0.4rem;
+        }
 
-.big{
-    font-size:28px;
-    font-weight:600;
-    color:var(--accent);
-}
+        .tooltip-icon {
+            cursor: help;
+            background: #e2e8f0;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
 
-.small{font-size:12px;color:var(--muted);}
+        input, select {
+            width: 100%;
+            padding: 0.7rem 0.9rem;
+            font-size: 0.95rem;
+            border: 1px solid #cfdee9;
+            border-radius: 16px;
+            background: #fff;
+            transition: 0.2s;
+            font-family: inherit;
+        }
 
-button{
-    padding:10px;
-    border:none;
-    border-radius:10px;
-    cursor:pointer;
-    margin-right:6px;
-}
+        input:focus, select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.2);
+        }
 
-.primary{background:var(--accent);color:#fff;}
-.secondary{background:#e5e7eb;}
+        .radio-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
 
-.scenario-item{
-    padding:8px;
-    border:1px solid #eee;
-    border-radius:8px;
-    margin-bottom:6px;
-    cursor:pointer;
-}
+        .radio-group label {
+            font-weight: normal;
+            text-transform: none;
+            gap: 0.3rem;
+            cursor: pointer;
+        }
 
-.insight{
-    padding:10px;
-    border-radius:10px;
-    background:#eef2ff;
-    font-size:13px;
-}
+        button {
+            background: #1e2f3f;
+            border: none;
+            padding: 0.7rem 1.5rem;
+            border-radius: 40px;
+            font-weight: 500;
+            color: white;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.9rem;
+        }
 
-</style>
+        button.secondary {
+            background: #eef2f6;
+            color: #1e2a3a;
+            border: 1px solid #ccd7e4;
+        }
+
+        button:hover {
+            background: #0f1e2c;
+            transform: translateY(-1px);
+        }
+
+        .results {
+            background: #f8fafc;
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid #e2edf2;
+            flex-wrap: wrap;
+        }
+
+        .result-value {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: #0f2b3b;
+        }
+
+        .badge {
+            background: #e6f0ff;
+            color: #1e4a76;
+            border-radius: 30px;
+            padding: 0.2rem 0.7rem;
+            font-size: 0.75rem;
+        }
+
+        .file-info {
+            background: #f1f5f9;
+            padding: 0.8rem;
+            border-radius: 16px;
+            font-size: 0.8rem;
+            font-family: monospace;
+            word-break: break-word;
+        }
+
+        .error {
+            color: #dc2626;
+            font-size: 0.8rem;
+            margin-top: 0.3rem;
+        }
+
+        hr {
+            margin: 1rem 0;
+            border: none;
+            border-top: 1px solid #e2edf2;
+        }
+
+        @media (max-width: 700px) {
+            body { padding: 1rem; }
+            .card { padding: 1.25rem; }
+        }
+    </style>
 </head>
-
 <body>
+<div class="container">
+    <!-- Заголовок -->
+    <div style="margin-bottom: 1.5rem;">
+        <h1 style="font-weight: 700; font-size: 1.8rem;">🏢 Арендный калькулятор</h1>
+        <p style="color: #4b5e6c;">Анализ ставок с учётом НДС 22%, эксплуатации, гибридных моделей и индексации</p>
+    </div>
 
-<div class="wrapper">
+    <!-- Блок загрузки справочника -->
+    <div class="card">
+        <div class="card-header">
+            <h2>📁 1. Загрузка справочника (обязательно)</h2>
+            <span class="badge">JSON / CSV</span>
+        </div>
+        <div class="grid-2col">
+            <div>
+                <div class="form-group">
+                    <label>📄 Файл со ставками <span class="tooltip-icon" title="Структура: этаж, тип_помещения (основное/островная), товарная_группа, мин_ставка, макс_ставка, эксплуатационная_ставка (опционально)">?</span></label>
+                    <input type="file" id="fileUpload" accept=".json,.csv">
+                    <button id="loadFileBtn" style="margin-top: 10px; width: auto;">Загрузить и применить</button>
+                </div>
+                <div id="fileStatus" class="file-info">⚡ Данные не загружены. Загрузите JSON/CSV или используйте встроенный демо-справочник.</div>
+            </div>
+            <div>
+                <div class="form-group">
+                    <label>📋 Пример формата (JSON)</label>
+                    <pre style="background:#f1f5f9; padding: 8px; border-radius: 12px; font-size: 11px; overflow-x: auto;">[
+  {"этаж":"1","тип":"основное","категория":"Одежда","мин_ставка":491,"макс_ставка":1322,"эксплуатация":565},
+  {"этаж":"подвал","тип":"островная","категория":"Украшения","мин_ставка":551,"макс_ставка":1481}
+]</pre>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<!-- SIDEBAR -->
-<div class="sidebar">
-<h2>Параметры</h2>
+    <!-- Параметры выбора из справочника -->
+    <div class="card">
+        <h2>🏷️ 2. Выбор из загруженных данных</h2>
+        <div class="grid-2col">
+            <div class="form-group">
+                <label>🏢 Этаж</label>
+                <select id="floorSelect" disabled>
+                    <option value="">— сначала загрузите справочник —</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>📦 Тип помещения</label>
+                <select id="typeSelect" disabled>
+                    <option value="">— загрузите справочник —</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>👕 Товарная группа</label>
+                <select id="categorySelect" disabled>
+                    <option value="">— загрузите справочник —</option>
+                </select>
+            </div>
+        </div>
+        <div id="rangePreview" class="file-info" style="margin-top: 0.5rem;">📊 Диапазон ставок (без НДС/экспл.): не выбран</div>
+    </div>
 
-<select id="scenario">
-<option value="base">Базовая</option>
-<option value="percent">% от оборота</option>
-<option value="hybrid">Гибрид</option>
-<option value="index">Индексация</option>
-</select>
+    <!-- Ручные параметры и сценарии -->
+    <div class="card">
+        <h2>⚙️ 3. Параметры договора и сценарии</h2>
+        <div class="grid-2col">
+            <div>
+                <div class="form-group"><label>📐 Площадь, м²</label><input type="number" id="area" value="120" step="1"></div>
+                <div class="form-group"><label>💰 Базовая ставка (фикс, руб/м², без НДС/экспл.)</label><input type="number" id="baseRateManual" value="850" step="10"></div>
+                <div class="form-group"><label>💸 Выручка арендатора (мес, руб)</label><input type="number" id="revenue" value="1500000" step="10000"></div>
+                <div class="form-group"><label>📊 % от оборота (для % и гибрида)</label><input type="number" id="turnoverPercent" value="5" step="0.5"></div>
+                <div class="form-group"><label>⏱️ Срок аренды (лет)</label><input type="number" id="leaseTerm" value="5" step="1"></div>
+                <div class="form-group"><label>📈 Инфляция / индекс % (годовая)</label><input type="number" id="inflation" value="4.5" step="0.5"></div>
+            </div>
+            <div>
+                <div class="form-group"><label>🎯 Сценарий расчёта</label>
+                    <div class="radio-group" id="scenarioGroup">
+                        <label><input type="radio" name="scenario" value="min" checked> 🟢 Мин. ставка (справочник)</label>
+                        <label><input type="radio" name="scenario" value="max"> 🔴 Макс. ставка (справочник)</label>
+                        <label><input type="radio" name="scenario" value="base"> 📌 Базовая (ручной ввод)</label>
+                        <label><input type="radio" name="scenario" value="percent"> 📈 % от оборота</label>
+                        <label><input type="radio" name="scenario" value="hybrid"> 🧬 Гибрид (фикс + %)</label>
+                        <label><input type="radio" name="scenario" value="index"> 📆 Индексация (к базовой)</label>
+                    </div>
+                </div>
+                <div class="form-group" style="margin-top: 1rem;">
+                    <button id="resetBtn" class="secondary" style="width: auto;">⟳ Сбросить все</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<input id="area" type="number" placeholder="Площадь" value="100">
-<input id="baseRate" type="number" placeholder="Ставка" value="1000">
-<input id="revenue" type="number" placeholder="Выручка" value="500000">
-<input id="percent" type="number" placeholder="% от выручки" value="5">
-<input id="years" type="number" placeholder="Срок" value="5">
-<input id="index" type="number" placeholder="Индекс %" value="5">
-
-<select id="floor"></select>
-<select id="category"></select>
-
-<input type="file" id="fileInput">
-
-<button class="primary" onclick="saveScenario()">Сохранить</button>
-<button class="secondary" onclick="resetAll()">Сброс</button>
-
-<h3>Сценарии</h3>
-<div id="saved"></div>
-
-</div>
-
-<!-- MAIN -->
-<div class="main">
-
-<div class="card">
-<div class="small">Ставка</div>
-<div class="big" id="rate">—</div>
-
-<div class="small">Аренда</div>
-<div class="big" id="rent">—</div>
-</div>
-
-<div class="card">
-<canvas id="chart"></canvas>
-</div>
-
-<div class="card">
-<div class="small">AI-инсайт</div>
-<div class="insight" id="insight"></div>
-</div>
-
-</div>
-
+    <!-- Результаты -->
+    <div class="card">
+        <h2>📊 4. Детальный расчёт аренды</h2>
+        <div id="resultsContainer" class="results">
+            <div style="text-align: center; color: #6c86a3;">Заполните данные и выберите сценарий</div>
+        </div>
+    </div>
 </div>
 
 <script>
-let floorCoeffs={1:1.2,2:1};
-let categoryCoeffs={default:1};
-let chart;
+    // ---------- Глобальное состояние ----------
+    let dictionaryData = [];       // массив записей { floor, type, category, min_rate, max_rate, operating_rate }
+    let uniqueFloors = [];
+    let uniqueTypes = [];
+    let uniqueCategories = [];
+    let currentOpExRate = 565;    // эксплуатационная ставка по умолчанию (из ТЗ)
+    let loadedFlag = false;
 
-// init dropdowns
-function populate(){
-floor.innerHTML="";
-category.innerHTML="";
+    // DOM элементы
+    const floorSelect = document.getElementById('floorSelect');
+    const typeSelect = document.getElementById('typeSelect');
+    const categorySelect = document.getElementById('categorySelect');
+    const fileInput = document.getElementById('fileUpload');
+    const loadBtn = document.getElementById('loadFileBtn');
+    const fileStatusDiv = document.getElementById('fileStatus');
+    const rangePreview = document.getElementById('rangePreview');
+    const areaInput = document.getElementById('area');
+    const baseRateManual = document.getElementById('baseRateManual');
+    const revenueInput = document.getElementById('revenue');
+    const turnoverPercent = document.getElementById('turnoverPercent');
+    const leaseTerm = document.getElementById('leaseTerm');
+    const inflationInput = document.getElementById('inflation');
+    const resetBtn = document.getElementById('resetBtn');
+    const resultsDiv = document.getElementById('resultsContainer');
 
-Object.keys(floorCoeffs).forEach(k=>{
-floor.innerHTML+=`<option>${k}</option>`;
-});
+    // Вспомогательные функции
+    function formatNumber(num) {
+        return new Intl.NumberFormat('ru-RU', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(num);
+    }
 
-Object.keys(categoryCoeffs).forEach(k=>{
-category.innerHTML+=`<option>${k}</option>`;
-});
-}
+    function formatMoney(val) {
+        return new Intl.NumberFormat('ru-RU', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(val) + ' ₽';
+    }
 
-// calc
-function calc(){
-let area=+areaEl.value||0;
-let base=+baseRate.value||0;
-let revenue=+revenueEl.value||0;
-let percent=(+percentEl.value||0)/100;
-let years=+yearsEl.value||0;
-let index=(+indexEl.value||0)/100;
+    // Обновление селекторов на основе dictionaryData
+    function rebuildSelectors() {
+        if (!dictionaryData.length) {
+            floorSelect.innerHTML = '<option value="">— нет данных —</option>';
+            typeSelect.innerHTML = '<option value="">— нет данных —</option>';
+            categorySelect.innerHTML = '<option value="">— нет данных —</option>';
+            floorSelect.disabled = true;
+            typeSelect.disabled = true;
+            categorySelect.disabled = true;
+            return;
+        }
+        uniqueFloors = [...new Set(dictionaryData.map(item => item.floor))];
+        uniqueTypes = [...new Set(dictionaryData.map(item => item.type))];
+        uniqueCategories = [...new Set(dictionaryData.map(item => item.category))];
 
-let adj=base*(floorCoeffs[floor.value]||1)*(categoryCoeffs[category.value]||1);
+        floorSelect.innerHTML = '<option value="">Выберите этаж</option>' + uniqueFloors.map(f => `<option value="${f}">${f}</option>`).join('');
+        typeSelect.innerHTML = '<option value="">Выберите тип</option>' + uniqueTypes.map(t => `<option value="${t}">${t}</option>`).join('');
+        categorySelect.innerHTML = '<option value="">Выберите товарную группу</option>' + uniqueCategories.map(c => `<option value="${c}">${c}</option>`).join('');
+        floorSelect.disabled = false;
+        typeSelect.disabled = false;
+        categorySelect.disabled = false;
+    }
 
-let rent=0;
+    // Получить текущие ставки min/max из справочника по выбранным фильтрам
+    function getCurrentRange() {
+        const floor = floorSelect.value;
+        const type = typeSelect.value;
+        const category = categorySelect.value;
+        if (!floor || !type || !category || !dictionaryData.length) return null;
+        const match = dictionaryData.find(item => item.floor === floor && item.type === type && item.category === category);
+        if (match) {
+            return { min: match.min_rate, max: match.max_rate, opEx: match.operating_rate !== undefined ? match.operating_rate : currentOpExRate };
+        }
+        return null;
+    }
 
-if(scenario.value==="base") rent=adj*area;
-if(scenario.value==="percent") rent=revenue*percent;
-if(scenario.value==="hybrid") rent=adj*area+revenue*percent;
-if(scenario.value==="index") rent=adj*area;
+    function updateRangePreview() {
+        const range = getCurrentRange();
+        if (range) {
+            rangePreview.innerHTML = `📊 Диапазон ставок (без НДС/экспл.): <strong>${range.min} — ${range.max} руб/м²</strong> | Эксплуатация: ${range.opEx} руб/м²`;
+        } else {
+            rangePreview.innerHTML = `📊 Диапазон ставок: выберите этаж, тип и товарную группу`;
+        }
+        calculateAll(); // пересчет при смене выбора
+    }
 
-rate.innerText=format(adj);
-rentEl.innerText=format(rent);
+    // При изменении селекторов пересчитываем
+    floorSelect.addEventListener('change', updateRangePreview);
+    typeSelect.addEventListener('change', updateRangePreview);
+    categorySelect.addEventListener('change', updateRangePreview);
 
-// forecast
-let arr=[];
-let cur=rent;
+    // --- Парсинг и загрузка файла ---
+    function loadFileContent(file) {
+        const fileType = file.name.split('.').pop().toLowerCase();
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const content = e.target.result;
+            try {
+                if (fileType === 'json') {
+                    const jsonData = JSON.parse(content);
+                    parseRawDataToDictionary(jsonData);
+                } else if (fileType === 'csv') {
+                    Papa.parse(content, { header: true, skipEmptyLines: true, complete: (results) => {
+                        if (results.data && results.data.length) {
+                            parseRawDataToDictionary(results.data);
+                        } else {
+                            throw new Error('CSV пуст или неверен');
+                        }
+                    }});
+                } else {
+                    fileStatusDiv.innerHTML = '❌ Неподдерживаемый формат. Используйте JSON или CSV';
+                }
+            } catch(err) {
+                fileStatusDiv.innerHTML = `❌ Ошибка парсинга: ${err.message}`;
+                console.error(err);
+            }
+        };
+        reader.readAsText(file, 'UTF-8');
+    }
 
-for(let i=1;i<=years;i++){
-if(scenario.value==="index") cur*=1+index;
-arr.push(cur);
-}
+    // Преобразование сырых данных в единый формат
+    function parseRawDataToDictionary(rawArray) {
+        const mapped = [];
+        for (let row of rawArray) {
+            // ищем поля в любом регистре / вариантах
+            const floor = row.этаж || row.floor || row.Этаж;
+            const type = row.тип || row.type || row.Тип || row.тип_помещения;
+            const category = row.категория || row.category || row.товарная_группа || row.ТоварнаяГруппа;
+            let minRate = parseFloat(row.мин_ставка || row.min_rate || row.min);
+            let maxRate = parseFloat(row.макс_ставка || row.max_rate || row.max);
+            let opRate = parseFloat(row.эксплуатационная_ставка || row.operating_rate || row.op_ex);
+            if (isNaN(minRate) || isNaN(maxRate)) continue;
+            if (!floor || !type || !category) continue;
+            mapped.push({
+                floor: String(floor).trim(),
+                type: String(type).trim(),
+                category: String(category).trim(),
+                min_rate: minRate,
+                max_rate: maxRate,
+                operating_rate: isNaN(opRate) ? undefined : opRate
+            });
+        }
+        if (mapped.length === 0) throw new Error('Не найдено валидных записей. Убедитесь в колонках: этаж, тип, категория, мин_ставка, макс_ставка');
+        dictionaryData = mapped;
+        // определяем общую эксплуатационную ставку (если есть единая) - приоритет у первой непустой
+        const anyOpEx = mapped.find(r => r.operating_rate !== undefined);
+        if (anyOpEx && anyOpEx.operating_rate) currentOpExRate = anyOpEx.operating_rate;
+        loadedFlag = true;
+        rebuildSelectors();
+        fileStatusDiv.innerHTML = `✅ Загружено записей: ${dictionaryData.length}. Эксплуатационная ставка: ${currentOpExRate} руб/м² (переопределяется в записях).`;
+        updateRangePreview();
+        // автосброс выбора для актуальности
+        floorSelect.value = uniqueFloors[0] || '';
+        typeSelect.value = uniqueTypes[0] || '';
+        categorySelect.value = uniqueCategories[0] || '';
+        updateRangePreview();
+    }
 
-drawChart(arr);
-generateInsight(adj,rent);
-}
+    // --- Встроенный демо-справочник на основе таблиц (пример для подвала/первого этажа) ---
+    function loadDemoDictionary() {
+        const demoData = [
+            // подвал, основные помещения (Таблица 8 для группы 1-5,9 пример)
+            { floor: "Подвал", type: "основное", category: "Одежда", min_rate: 363, max_rate: 976, operating_rate: 565 },
+            { floor: "Подвал", type: "основное", category: "Украшения и часы", min_rate: 363, max_rate: 976, operating_rate: 565 },
+            { floor: "Подвал", type: "основное", category: "Обувь", min_rate: 363, max_rate: 976, operating_rate: 565 },
+            { floor: "Подвал", type: "основное", category: "Мобильная связь", min_rate: 351, max_rate: 943, operating_rate: 565 },
+            { floor: "Подвал", type: "островная", category: "Украшения и часы", min_rate: 551, max_rate: 1481, operating_rate: 565 },
+            { floor: "Подвал", type: "островная", category: "Одежда, обувь", min_rate: 551, max_rate: 1540, operating_rate: 565 },
+            { floor: "1 этаж", type: "основное", category: "Одежда", min_rate: 491, max_rate: 1322, operating_rate: 565 },
+            { floor: "1 этаж", type: "основное", category: "Аксессуары", min_rate: 491, max_rate: 1320, operating_rate: 565 },
+            { floor: "1 этаж", type: "основное", category: "Рестораны, кафе", min_rate: 488, max_rate: 1314, operating_rate: 565 },
+            { floor: "1 этаж", type: "островная", category: "Украшения и часы", min_rate: 746, max_rate: 2007, operating_rate: 565 },
+            { floor: "2 этаж", type: "основное", category: "Одежда", min_rate: 454, max_rate: 1220, operating_rate: 565 },
+            { floor: "2 этаж", type: "основное", category: "Книги", min_rate: 467, max_rate: 1256, operating_rate: 565 },
+            { floor: "2 этаж", type: "островная", category: "Украшения и часы", min_rate: 689, max_rate: 1853, operating_rate: 565 },
+            { floor: "Антресоль", type: "основное", category: "Одежда", min_rate: 454, max_rate: 1220, operating_rate: 565 }
+        ];
+        dictionaryData = demoData;
+        currentOpExRate = 565;
+        loadedFlag = true;
+        rebuildSelectors();
+        fileStatusDiv.innerHTML = `📁 Используется демо-справочник (${dictionaryData.length} записей). Загрузите свой файл для замены.`;
+        updateRangePreview();
+        // установим значения по умолчанию
+        if (uniqueFloors.length) floorSelect.value = uniqueFloors[0];
+        if (uniqueTypes.length) typeSelect.value = uniqueTypes[0];
+        if (uniqueCategories.length) categorySelect.value = uniqueCategories[0];
+        updateRangePreview();
+    }
 
-// chart
-function drawChart(data){
-if(chart) chart.destroy();
-
-chart=new Chart(document.getElementById("chart"),{
-type:"line",
-data:{
-labels:data.map((_,i)=>"Год "+(i+1)),
-datasets:[{data:data}]
-}
-});
-}
-
-// insight
-function generateInsight(rate,rent){
-let msg="";
-
-if(rate<800) msg="Ставка ниже рынка — потенциал роста";
-else if(rate>2000) msg="Высокая ставка — риск для арендатора";
-else msg="Ставка в рыночном диапазоне";
-
-insight.innerText=msg;
-}
-
-// save scenario
-function saveScenario(){
-let data={
-area:area.value,
-base:baseRate.value,
-revenue:revenue.value,
-percent:percent.value
-};
-
-let list=JSON.parse(localStorage.getItem("scenarios")||"[]");
-list.push(data);
-localStorage.setItem("scenarios",JSON.stringify(list));
-renderSaved();
-}
-
-// render saved
-function renderSaved(){
-let list=JSON.parse(localStorage.getItem("scenarios")||"[]");
-saved.innerHTML="";
-
-list.forEach(s=>{
-let div=document.createElement("div");
-div.className="scenario-item";
-div.innerText=`${s.area}м²`;
-div.onclick=()=>{
-area.value=s.area;
-baseRate.value=s.base;
-revenue.value=s.revenue;
-percent.value=s.percent;
-calc();
-};
-saved.appendChild(div);
-});
-}
-
-// export CSV
-function exportCSV(){
-let csv="rate,rent\n"+rate.innerText+","+rentEl.innerText;
-let blob=new Blob([csv]);
-let a=document.createElement("a");
-a.href=URL.createObjectURL(blob);
-a.download="data.csv";
-a.click();
-}
-
-// file load
-fileInput.addEventListener("change",e=>{
-let file=e.target.files[0];
-
-if(file.name.endsWith(".json")){
-let r=new FileReader();
-r.onload=ev=>{
-let d=JSON.parse(ev.target.result);
-floorCoeffs=d.floor_coefficients||floorCoeffs;
-categoryCoeffs=d.category_coefficients||categoryCoeffs;
-populate();
-};
-r.readAsText(file);
-}
-
-if(file.name.endsWith(".csv")){
-Papa.parse(file,{
-header:true,
-complete:res=>{
-res.data.forEach(r=>{
-if(r.type==="floor") floorCoeffs[r.key]=+r.value;
-if(r.type==="category") categoryCoeffs[r.key]=+r.value;
-});
-populate();
-}
-});
-}
-});
-
-// utils
-function format(n){
-return n.toLocaleString("ru-RU",{maximumFractionDigits:0});
-}
-
-function resetAll(){
-document.querySelectorAll("input").forEach(i=>i.value="");
-calc();
-}
-
-// refs
-const areaEl=area, baseRate=baseRate, revenueEl=revenue,
-percentEl=percent, yearsEl=years, indexEl=index,
-rentEl=rent;
-
-// init
-document.querySelectorAll("input,select").forEach(el=>{
-el.addEventListener("input",calc);
-});
-
-populate();
-renderSaved();
-calc();
-
+    // --- Основная логика расчёта ---
+    function calculateAll() {
+        if (!loadedFlag && dictionaryData.length === 0) {
+            resultsDiv.innerHTML = '<div class="error">⚠️ Не загружен справочник. Пожалуйста, загрузите JSON/CSV файл или используйте демо (кнопка сброса загрузит демо).</div>';
+            return;
+        }
+        const area = parseFloat(areaInput.value);
+        const baseManual = parseFloat(baseRateManual.value);
+        const revenue = parseFloat(revenueInput.value);
+        const percentTurn = parseFloat(turnoverPercent.value);
+        const termYears = parseFloat(leaseTerm.value);
+        const inflation = parseFloat(inflationInput.value);
+        if (isNaN(area) || area <= 0) { resultsDiv.innerHTML = '<div class="error">Укажите корректную площадь > 0</div>'; return; }
+        if (isNaN(revenue) || revenue < 0) return;
+        if (isNaN(percentTurn)) return;
+        
+        const range = getCurrentRange();
+        let minRateRaw = range ? range.min : 0;
+        let maxRateRaw = range ? range.max : 0;
+        let opExRateLocal = range ? range.opEx : currentOpExRate;
+        const vat = 1.22; // НДС 22%
+        
+        // базовые ставки с эксплуатацией и НДС
+        const minRateFull = (minRateRaw + opExRateLocal) * vat;
+        const maxRateFull = (maxRateRaw + opExRateLocal) * vat;
+        
+        // сценарии
+        const scenario = document.querySelector('input[name="scenario"]:checked').value;
+        let selectedRateRaw = 0;
+        let explanation = "";
+        
+        switch(scenario) {
+            case 'min':
+                selectedRateRaw = minRateRaw;
+                explanation = `Фиксированная минимальная ставка по справочнику: ${minRateRaw} руб/м² (без НДС/экспл.)`;
+                break;
+            case 'max':
+                selectedRateRaw = maxRateRaw;
+                explanation = `Фиксированная максимальная ставка по справочнику: ${maxRateRaw} руб/м²`;
+                break;
+            case 'base':
+                if (isNaN(baseManual) || baseManual <= 0) { selectedRateRaw = minRateRaw; explanation = `Базовая ставка не указана, использована минимальная ${minRateRaw}`; }
+                else { selectedRateRaw = baseManual; explanation = `Ручная базовая ставка: ${baseManual} руб/м²`; }
+                break;
+            case 'percent':
+                if (revenue <= 0 || percentTurn <= 0) { selectedRateRaw = 0; explanation = "Некорректные данные для % от оборота"; }
+                else {
+                    const monthlyPercentAmount = revenue * (percentTurn / 100);
+                    selectedRateRaw = monthlyPercentAmount / area;
+                    explanation = `% от оборота: ${percentTurn}% от выручки ${formatMoney(revenue)} = ${formatMoney(monthlyPercentAmount)} / ${area}м² = ${selectedRateRaw.toFixed(2)} руб/м²`;
+                }
+                break;
+            case 'hybrid':
+                {
+                    let fixedPart = (isNaN(baseManual) || baseManual <= 0) ? minRateRaw : baseManual;
+                    let percentPart = 0;
+                    if (revenue > 0 && percentTurn > 0) percentPart = (revenue * (percentTurn / 100)) / area;
+                    selectedRateRaw = fixedPart + percentPart;
+                    explanation = `Гибрид: фикс ${fixedPart.toFixed(2)} + % от оборота (${percentPart.toFixed(2)}) = ${selectedRateRaw.toFixed(2)} руб/м²`;
+                }
+                break;
+            case 'index':
+                {
+                    let baseForIndex = (isNaN(baseManual) || baseManual <= 0) ? minRateRaw : baseManual;
+                    let indexedRate = baseForIndex;
+                    let totalMultiplier = 1;
+                    for (let i=1; i<=termYears; i++) totalMultiplier *= (1 + inflation/100);
+                    indexedRate = baseForIndex * totalMultiplier;
+                    selectedRateRaw = indexedRate;
+                    explanation = `Индексация на ${termYears} лет с инфляцией ${inflation}% годовых: база ${baseForIndex.toFixed(2)} → итоговая ставка ${indexedRate.toFixed(2)} руб/м² (без экспл/НДС, средний эффект)`;
+                }
+                break;
+            default: selectedRateRaw = minRateRaw;
+        }
+        
+        // итоговая ставка за м² с эксплуатацией и НДС для выбранного сценария
+        let finalRateWithOpVat = 0;
+        let monthlyRent = 0;
+        if (selectedRateRaw > 0 || scenario === 'percent' || scenario === 'hybrid') {
+            if (scenario === 'percent' || scenario === 'hybrid') {
+                // Для оборота и гибрида: добавление эксплуатации + НДС уже учтено? по логике фикс+эксплуатация+НДС, а оборотная часть - без эксплуатации? Сделаем единообразно: добавляем опер.расходы и НДС к итоговой ставке (как база аренды)
+                finalRateWithOpVat = (selectedRateRaw + opExRateLocal) * vat;
+            } else {
+                finalRateWithOpVat = (selectedRateRaw + opExRateLocal) * vat;
+            }
+            monthlyRent = finalRateWithOpVat * area;
+        } else {
+            finalRateWithOpVat = 0;
+            monthlyRent = 0;
+        }
+        
+        // Прогноз на срок (простая индексация фикс части для демонстрации)
+        let forecastHtml = '';
+        if (scenario === 'index' && termYears > 0 && !isNaN(baseManual)) {
+            let baseForecast = (isNaN(baseManual) || baseManual <= 0) ? minRateRaw : baseManual;
+            let cumulative = baseForecast;
+            forecastHtml = `<div class="result-row"><span>📅 Прогноз (индексация):</span><span>`;
+            for (let y=1; y<=Math.min(termYears,5); y++) {
+                cumulative *= (1 + inflation/100);
+                let yearRate = (cumulative + opExRateLocal) * vat;
+                forecastHtml += `Год ${y}: ${formatMoney(yearRate * area)} (${yearRate.toFixed(0)} руб/м²) • `;
+            }
+            if (termYears>5) forecastHtml += `...`;
+            forecastHtml += `</span></div>`;
+        } else if (termYears>0 && scenario !== 'percent') {
+            let staticRent = monthlyRent;
+            forecastHtml = `<div class="result-row"><span>📈 Прогноз на ${termYears} лет (без индексации):</span><span>~${formatMoney(staticRent * 12 * termYears)} за весь срок</span></div>`;
+        }
+        
+        const minTotalRent = minRateFull * area;
+        const maxTotalRent = maxRateFull * area;
+        
+        let html = `
+            <div class="result-row"><span>📉 Минимальная ставка (с экспл.+НДС)</span><span class="result-value">${formatMoney(minRateFull)} / м²</span></div>
+            <div class="result-row"><span>📈 Максимальная ставка (с экспл.+НДС)</span><span class="result-value">${formatMoney(maxRateFull)} / м²</span></div>
+            <div class="result-row"><span>💰 Итоговая мин. арендная плата (мес)</span><span class="result-value">${formatMoney(minTotalRent)}</span></div>
+            <div class="result-row"><span>💎 Итоговая макс. арендная плата (мес)</span><span class="result-value">${formatMoney(maxTotalRent)}</span></div>
+            <hr>
+            <div class="result-row"><span>🎯 Выбранный сценарий:</span><span><strong>${scenarioLabel(scenario)}</strong></span></div>
+            <div class="result-row"><span>🧮 Формула расчёта</span><span style="font-family: monospace;">${explanation}</span></div>
+            <div class="result-row"><span>⚙️ Эксплуатационные расходы (м²)</span><span>${formatMoney(opExRateLocal)}</span></div>
+            <div class="result-row"><span>🏷️ НДС 22%</span><span>включён в ставки</span></div>
+            <div class="result-row"><span>💵 Итоговая ставка по сценарию (с экспл+НДС)</span><span class="result-value">${formatMoney(finalRateWithOpVat)} руб/м²</span></div>
+            <div class="result-row"><span>📆 Ежемесячная аренда (сценарий)</span><span class="result-value">${formatMoney(monthlyRent)}</span></div>
+            ${forecastHtml}
+        `;
+        resultsDiv.innerHTML = html;
+    }
+    
+    function scenarioLabel(sc) {
+        const map = { min: "Минимальная ставка", max: "Максимальная ставка", base: "Базовая (ручной ввод)", percent: "% от оборота", hybrid: "Гибридная модель", index: "Индексация на срок" };
+        return map[sc] || sc;
+    }
+    
+    // Обработчики событий и сброс
+    function attachInputEvents() {
+        const inputs = ['area', 'baseRateManual', 'revenue', 'turnoverPercent', 'leaseTerm', 'inflation'];
+        inputs.forEach(id => document.getElementById(id).addEventListener('input', () => calculateAll()));
+        document.querySelectorAll('input[name="scenario"]').forEach(radio => radio.addEventListener('change', () => calculateAll()));
+    }
+    
+    resetBtn.addEventListener('click', () => {
+        areaInput.value = '120';
+        baseRateManual.value = '850';
+        revenueInput.value = '1500000';
+        turnoverPercent.value = '5';
+        leaseTerm.value = '5';
+        inflationInput.value = '4.5';
+        document.querySelector('input[value="min"]').checked = true;
+        if (dictionaryData.length === 0) loadDemoDictionary();
+        else {
+            if (uniqueFloors.length) floorSelect.value = uniqueFloors[0];
+            if (uniqueTypes.length) typeSelect.value = uniqueTypes[0];
+            if (uniqueCategories.length) categorySelect.value = uniqueCategories[0];
+            updateRangePreview();
+        }
+        calculateAll();
+    });
+    
+    loadBtn.addEventListener('click', () => {
+        if (fileInput.files.length === 0) { fileStatusDiv.innerHTML = '⚠️ Выберите файл'; return; }
+        loadFileContent(fileInput.files[0]);
+    });
+    
+    // Инициализация демо-данными
+    loadDemoDictionary();
+    attachInputEvents();
+    calculateAll();
 </script>
-
 </body>
 </html>
