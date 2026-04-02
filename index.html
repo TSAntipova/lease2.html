@@ -1,9 +1,10 @@
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Профессиональный калькулятор аренды коммерческой недвижимости</title>
-    <!-- PapaParse CDN для парсинга CSV -->
+    <title>Калькулятор аренды коммерческой недвижимости | Ставки + эксплуатация + НДС</title>
+    <!-- Подключение PapaParse для CSV (опционально) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <style>
         * {
@@ -13,64 +14,64 @@
         }
 
         body {
-            background: #f0f2f5;
+            background: #eef2f5;
             font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
             padding: 2rem 1.5rem;
-            color: #1a2634;
+            color: #1a2c3e;
         }
 
         .container {
-            max-width: 1440px;
+            max-width: 1280px;
             margin: 0 auto;
         }
 
         /* карточки */
         .card {
             background: white;
-            border-radius: 24px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.02), 0 2px 6px rgba(0,0,0,0.05);
-            padding: 1.75rem;
+            border-radius: 28px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.02), 0 2px 6px rgba(0,0,0,0.04);
+            padding: 1.8rem;
             margin-bottom: 2rem;
+            border: 1px solid #e2e9f0;
             transition: all 0.2s;
-            border: 1px solid #e9edf2;
         }
 
         .card-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 1.5rem;
             flex-wrap: wrap;
             gap: 1rem;
+            margin-bottom: 1.5rem;
         }
 
         h2 {
             font-size: 1.5rem;
             font-weight: 600;
             letter-spacing: -0.3px;
-            background: linear-gradient(135deg, #1e2a3a, #0f1722);
+            background: linear-gradient(135deg, #1f3a4b, #0f2838);
             background-clip: text;
             -webkit-background-clip: text;
             color: transparent;
         }
 
         h3 {
-            font-size: 1.1rem;
-            font-weight: 500;
+            font-size: 1rem;
+            font-weight: 600;
             margin-bottom: 1rem;
-            color: #2c3e4e;
-            border-left: 4px solid #3b82f6;
+            color: #2c4c6c;
+            border-left: 4px solid #2c7da0;
             padding-left: 0.75rem;
         }
 
         .grid-2col {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 1.5rem;
         }
 
         .form-group {
-            margin-bottom: 1.2rem;
+            margin-bottom: 1.3rem;
         }
 
         label {
@@ -78,33 +79,33 @@
             align-items: center;
             gap: 0.4rem;
             font-weight: 500;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             text-transform: uppercase;
-            letter-spacing: 0.3px;
-            color: #4b5e6c;
+            letter-spacing: 0.4px;
+            color: #4a6572;
             margin-bottom: 0.4rem;
         }
 
         .tooltip-icon {
             cursor: help;
-            background: #e2e8f0;
+            background: #e2eaf1;
             border-radius: 50%;
-            width: 16px;
-            height: 16px;
+            width: 18px;
+            height: 18px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             font-size: 11px;
             font-weight: bold;
-            color: #2c3e50;
+            color: #1e4a6e;
         }
 
         input, select {
             width: 100%;
-            padding: 0.7rem 0.9rem;
+            padding: 0.75rem 1rem;
             font-size: 0.95rem;
-            border: 1px solid #cfdee9;
-            border-radius: 16px;
+            border: 1px solid #cbdde6;
+            border-radius: 20px;
             background: #fff;
             transition: 0.2s;
             font-family: inherit;
@@ -112,305 +113,413 @@
 
         input:focus, select:focus {
             outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59,130,246,0.2);
+            border-color: #2c7da0;
+            box-shadow: 0 0 0 3px rgba(44,125,160,0.15);
         }
 
         .radio-group {
             display: flex;
             flex-wrap: wrap;
-            gap: 1rem;
+            gap: 1.2rem;
             margin-top: 0.5rem;
         }
 
         .radio-group label {
-            font-weight: normal;
+            font-weight: 500;
             text-transform: none;
-            gap: 0.3rem;
+            gap: 0.4rem;
             cursor: pointer;
         }
 
         button {
-            background: #1e2f3f;
+            background: #1f4e6e;
             border: none;
-            padding: 0.7rem 1.5rem;
+            padding: 0.7rem 1.6rem;
             border-radius: 40px;
             font-weight: 500;
             color: white;
             cursor: pointer;
             transition: 0.2s;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
 
         button.secondary {
-            background: #eef2f6;
-            color: #1e2a3a;
-            border: 1px solid #ccd7e4;
+            background: #eef2f7;
+            color: #1f4e6e;
+            border: 1px solid #cbdde6;
         }
 
         button:hover {
-            background: #0f1e2c;
+            background: #0f3b54;
             transform: translateY(-1px);
         }
 
         .results {
-            background: #f8fafc;
-            border-radius: 20px;
+            background: #f8fbfe;
+            border-radius: 24px;
             padding: 1.5rem;
-            margin-top: 1rem;
+            margin-top: 0.5rem;
+            border: 1px solid #e2edf4;
         }
 
         .result-row {
             display: flex;
             justify-content: space-between;
+            align-items: baseline;
             padding: 0.8rem 0;
-            border-bottom: 1px solid #e2edf2;
+            border-bottom: 1px solid #e2edf4;
             flex-wrap: wrap;
+            gap: 0.5rem;
         }
 
         .result-value {
             font-weight: 700;
             font-size: 1.2rem;
-            color: #0f2b3b;
+            color: #1a4b6e;
+            font-family: monospace;
         }
 
         .badge {
-            background: #e6f0ff;
-            color: #1e4a76;
-            border-radius: 30px;
-            padding: 0.2rem 0.7rem;
-            font-size: 0.75rem;
+            background: #e6f2f9;
+            color: #1f5e83;
+            border-radius: 40px;
+            padding: 0.2rem 0.8rem;
+            font-size: 0.7rem;
+            font-weight: 500;
         }
 
         .file-info {
-            background: #f1f5f9;
-            padding: 0.8rem;
-            border-radius: 16px;
+            background: #f1f6fa;
+            padding: 0.8rem 1rem;
+            border-radius: 18px;
             font-size: 0.8rem;
             font-family: monospace;
             word-break: break-word;
         }
 
         .error {
-            color: #dc2626;
+            color: #c23b22;
             font-size: 0.8rem;
             margin-top: 0.3rem;
         }
 
         hr {
-            margin: 1rem 0;
+            margin: 0.8rem 0;
             border: none;
-            border-top: 1px solid #e2edf2;
+            border-top: 1px solid #e2edf4;
         }
 
         @media (max-width: 700px) {
             body { padding: 1rem; }
-            .card { padding: 1.25rem; }
+            .card { padding: 1.2rem; }
+            .result-value { font-size: 1rem; }
         }
     </style>
 </head>
 <body>
 <div class="container">
-    <!-- Заголовок -->
+    <!-- заголовок -->
     <div style="margin-bottom: 1.5rem;">
-        <h1 style="font-weight: 700; font-size: 1.8rem;">🏢 Арендный калькулятор</h1>
-        <p style="color: #4b5e6c;">Анализ ставок с учётом НДС 22%, эксплуатации, гибридных моделей и индексации</p>
+        <h1 style="font-weight: 700; font-size: 1.9rem;">🏢 Арендный калькулятор</h1>
+        <p style="color: #4c6a7c;">Расчёт ставок на основе справочника (этаж, тип, товарная группа) + эксплуатация 565 ₽/м² + НДС 22%</p>
     </div>
 
     <!-- Блок загрузки справочника -->
     <div class="card">
         <div class="card-header">
-            <h2>📁 1. Загрузка справочника (обязательно)</h2>
+            <h2>📁 1. Загрузка справочника ставок</h2>
             <span class="badge">JSON / CSV</span>
         </div>
         <div class="grid-2col">
             <div>
                 <div class="form-group">
-                    <label>📄 Файл со ставками <span class="tooltip-icon" title="Структура: этаж, тип_помещения (основное/островная), товарная_группа, мин_ставка, макс_ставка, эксплуатационная_ставка (опционально)">?</span></label>
+                    <label>📄 Файл (ставки по диапазонам) <span class="tooltip-icon" title="Ожидаемые колонки: этаж, тип (основное/островная), товарная_группа, группа_площади, мин_ставка, макс_ставка. Эксплуатация 565 и НДС 22% добавляются автоматически.">?</span></label>
                     <input type="file" id="fileUpload" accept=".json,.csv">
-                    <button id="loadFileBtn" style="margin-top: 10px; width: auto;">Загрузить и применить</button>
+                    <button id="loadFileBtn" style="margin-top: 12px; width: auto;">Загрузить и применить</button>
                 </div>
-                <div id="fileStatus" class="file-info">⚡ Данные не загружены. Загрузите JSON/CSV или используйте встроенный демо-справочник.</div>
+                <div id="fileStatus" class="file-info">⚡ Встроен демо-справочник (на основе таблиц 8–14). Вы можете загрузить свой JSON/CSV.</div>
             </div>
             <div>
                 <div class="form-group">
-                    <label>📋 Пример формата (JSON)</label>
-                    <pre style="background:#f1f5f9; padding: 8px; border-radius: 12px; font-size: 11px; overflow-x: auto;">[
-  {"этаж":"1","тип":"основное","категория":"Одежда","мин_ставка":491,"макс_ставка":1322,"эксплуатация":565},
-  {"этаж":"подвал","тип":"островная","категория":"Украшения","мин_ставка":551,"макс_ставка":1481}
+                    <label>📋 Пример JSON</label>
+                    <pre style="background:#f1f6fa; padding: 8px; border-radius: 16px; font-size: 11px; overflow-x: auto;">[
+  {"этаж":"Подвал","тип":"основное","товарная_группа":"Одежда","группа_площади":"1-5,9","мин_ставка":363,"макс_ставка":976},
+  {"этаж":"1 этаж","тип":"островная","товарная_группа":"Украшения и часы","группа_площади":"1-5,9","мин_ставка":746,"макс_ставка":2007}
 ]</pre>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Параметры выбора из справочника -->
+    <!-- Параметры выбора из справочника + ручной ввод -->
     <div class="card">
-        <h2>🏷️ 2. Выбор из загруженных данных</h2>
-        <div class="grid-2col">
-            <div class="form-group">
-                <label>🏢 Этаж</label>
-                <select id="floorSelect" disabled>
-                    <option value="">— сначала загрузите справочник —</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>📦 Тип помещения</label>
-                <select id="typeSelect" disabled>
-                    <option value="">— загрузите справочник —</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>👕 Товарная группа</label>
-                <select id="categorySelect" disabled>
-                    <option value="">— загрузите справочник —</option>
-                </select>
-            </div>
-        </div>
-        <div id="rangePreview" class="file-info" style="margin-top: 0.5rem;">📊 Диапазон ставок (без НДС/экспл.): не выбран</div>
-    </div>
-
-    <!-- Ручные параметры и сценарии -->
-    <div class="card">
-        <h2>⚙️ 3. Параметры договора и сценарии</h2>
+        <h2>🏷️ 2. Параметры аренды</h2>
         <div class="grid-2col">
             <div>
-                <div class="form-group"><label>📐 Площадь, м²</label><input type="number" id="area" value="120" step="1"></div>
-                <div class="form-group"><label>💰 Базовая ставка (фикс, руб/м², без НДС/экспл.)</label><input type="number" id="baseRateManual" value="850" step="10"></div>
-                <div class="form-group"><label>💸 Выручка арендатора (мес, руб)</label><input type="number" id="revenue" value="1500000" step="10000"></div>
-                <div class="form-group"><label>📊 % от оборота (для % и гибрида)</label><input type="number" id="turnoverPercent" value="5" step="0.5"></div>
-                <div class="form-group"><label>⏱️ Срок аренды (лет)</label><input type="number" id="leaseTerm" value="5" step="1"></div>
-                <div class="form-group"><label>📈 Инфляция / индекс % (годовая)</label><input type="number" id="inflation" value="4.5" step="0.5"></div>
+                <div class="form-group">
+                    <label>🏢 Этаж</label>
+                    <select id="floorSelect">
+                        <option value="">— выберите —</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>📦 Тип помещения</label>
+                    <select id="typeSelect">
+                        <option value="">— выберите —</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>👕 Товарная группа</label>
+                    <select id="categorySelect">
+                        <option value="">— выберите —</option>
+                    </select>
+                </div>
             </div>
             <div>
-                <div class="form-group"><label>🎯 Сценарий расчёта</label>
+                <div class="form-group">
+                    <label>📐 Площадь (м²) <span class="tooltip-icon" title="Влияет на выбор диапазона площадей из справочника">?</span></label>
+                    <input type="number" id="area" value="85" step="1">
+                </div>
+                <div class="form-group">
+                    <label>⏱️ Срок аренды (лет)</label>
+                    <input type="number" id="leaseTerm" value="5" step="1">
+                </div>
+                <div class="form-group">
+                    <label>🎯 Сценарий расчёта</label>
                     <div class="radio-group" id="scenarioGroup">
-                        <label><input type="radio" name="scenario" value="min" checked> 🟢 Мин. ставка (справочник)</label>
-                        <label><input type="radio" name="scenario" value="max"> 🔴 Макс. ставка (справочник)</label>
-                        <label><input type="radio" name="scenario" value="base"> 📌 Базовая (ручной ввод)</label>
-                        <label><input type="radio" name="scenario" value="percent"> 📈 % от оборота</label>
-                        <label><input type="radio" name="scenario" value="hybrid"> 🧬 Гибрид (фикс + %)</label>
-                        <label><input type="radio" name="scenario" value="index"> 📆 Индексация (к базовой)</label>
+                        <label><input type="radio" name="scenario" value="min" checked> 🟢 Минимальная ставка</label>
+                        <label><input type="radio" name="scenario" value="max"> 🔴 Максимальная ставка</label>
                     </div>
                 </div>
-                <div class="form-group" style="margin-top: 1rem;">
-                    <button id="resetBtn" class="secondary" style="width: auto;">⟳ Сбросить все</button>
-                </div>
             </div>
+        </div>
+        <div id="rangePreview" class="file-info" style="margin-top: 0.8rem;">📊 Данные справочника: не выбраны параметры</div>
+        <div style="margin-top: 1.2rem;">
+            <button id="resetBtn" class="secondary">⟳ Сбросить все параметры</button>
         </div>
     </div>
 
-    <!-- Результаты -->
+    <!-- Результаты расчёта -->
     <div class="card">
-        <h2>📊 4. Детальный расчёт аренды</h2>
+        <h2>📊 3. Расчёт арендной платы (с эксплуатацией 565 ₽/м² + НДС 22%)</h2>
         <div id="resultsContainer" class="results">
-            <div style="text-align: center; color: #6c86a3;">Заполните данные и выберите сценарий</div>
+            <div style="text-align: center; color: #6c86a3;">Заполните параметры и выберите товарную группу</div>
         </div>
     </div>
 </div>
 
 <script>
-    // ---------- Глобальное состояние ----------
-    let dictionaryData = [];       // массив записей { floor, type, category, min_rate, max_rate, operating_rate }
+    // ------------------- Глобальные переменные -------------------
+    let dictionaryData = [];       // массив объектов { этаж, тип, товарная_группа, группа_площади, мин_ставка, макс_ставка }
     let uniqueFloors = [];
     let uniqueTypes = [];
     let uniqueCategories = [];
-    let currentOpExRate = 565;    // эксплуатационная ставка по умолчанию (из ТЗ)
-    let loadedFlag = false;
+
+    // Константы
+    const OPEX_RATE = 565;         // эксплуатационная ставка руб/м²
+    const VAT_RATE = 0.22;         // 22% НДС
 
     // DOM элементы
     const floorSelect = document.getElementById('floorSelect');
     const typeSelect = document.getElementById('typeSelect');
     const categorySelect = document.getElementById('categorySelect');
+    const areaInput = document.getElementById('area');
+    const leaseTermInput = document.getElementById('leaseTerm');
     const fileInput = document.getElementById('fileUpload');
     const loadBtn = document.getElementById('loadFileBtn');
     const fileStatusDiv = document.getElementById('fileStatus');
-    const rangePreview = document.getElementById('rangePreview');
-    const areaInput = document.getElementById('area');
-    const baseRateManual = document.getElementById('baseRateManual');
-    const revenueInput = document.getElementById('revenue');
-    const turnoverPercent = document.getElementById('turnoverPercent');
-    const leaseTerm = document.getElementById('leaseTerm');
-    const inflationInput = document.getElementById('inflation');
+    const rangePreviewDiv = document.getElementById('rangePreview');
     const resetBtn = document.getElementById('resetBtn');
     const resultsDiv = document.getElementById('resultsContainer');
 
-    // Вспомогательные функции
-    function formatNumber(num) {
-        return new Intl.NumberFormat('ru-RU', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(num);
+    // Вспомогательные функции форматирования
+    function formatMoney(value) {
+        return new Intl.NumberFormat('ru-RU', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(Math.round(value)) + ' ₽';
     }
 
-    function formatMoney(val) {
-        return new Intl.NumberFormat('ru-RU', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(val) + ' ₽';
+    function formatNumber(value) {
+        return new Intl.NumberFormat('ru-RU', { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(value);
     }
 
-    // Обновление селекторов на основе dictionaryData
+    // Определение группы площади по введённой площади (в зависимости от диапазонов из таблиц)
+    function getAreaGroup(area) {
+        if (area <= 5.9) return "1-5,9";
+        if (area <= 14.9) return "6-14,9";
+        if (area <= 49.9) return "15-49,9";
+        if (area <= 149.9) return "50-149,9";
+        if (area <= 299.9) return "150-299,9";
+        if (area <= 499.9) return "300-499,9";
+        if (area <= 999.9) return "500-999,9";
+        if (area <= 2999.9) return "1000-2999,9";
+        if (area <= 4999.9) return "3000-4999,9";
+        return "5000 и более";
+    }
+
+    // Поиск записи в справочнике по выбранным параметрам + группе площади
+    function findRateEntry(floor, type, category, area) {
+        if (!floor || !type || !category) return null;
+        const areaGroup = getAreaGroup(area);
+        const match = dictionaryData.find(entry => 
+            entry.этаж === floor && 
+            entry.тип === type && 
+            entry.товарная_группа === category && 
+            entry.группа_площади === areaGroup
+        );
+        return match || null;
+    }
+
+    // Обновление выпадающих списков на основе загруженного словаря
     function rebuildSelectors() {
         if (!dictionaryData.length) {
             floorSelect.innerHTML = '<option value="">— нет данных —</option>';
             typeSelect.innerHTML = '<option value="">— нет данных —</option>';
             categorySelect.innerHTML = '<option value="">— нет данных —</option>';
-            floorSelect.disabled = true;
-            typeSelect.disabled = true;
-            categorySelect.disabled = true;
             return;
         }
-        uniqueFloors = [...new Set(dictionaryData.map(item => item.floor))];
-        uniqueTypes = [...new Set(dictionaryData.map(item => item.type))];
-        uniqueCategories = [...new Set(dictionaryData.map(item => item.category))];
+        uniqueFloors = [...new Set(dictionaryData.map(item => item.этаж))];
+        uniqueTypes = [...new Set(dictionaryData.map(item => item.тип))];
+        uniqueCategories = [...new Set(dictionaryData.map(item => item.товарная_группа))];
 
         floorSelect.innerHTML = '<option value="">Выберите этаж</option>' + uniqueFloors.map(f => `<option value="${f}">${f}</option>`).join('');
         typeSelect.innerHTML = '<option value="">Выберите тип</option>' + uniqueTypes.map(t => `<option value="${t}">${t}</option>`).join('');
         categorySelect.innerHTML = '<option value="">Выберите товарную группу</option>' + uniqueCategories.map(c => `<option value="${c}">${c}</option>`).join('');
-        floorSelect.disabled = false;
-        typeSelect.disabled = false;
-        categorySelect.disabled = false;
     }
 
-    // Получить текущие ставки min/max из справочника по выбранным фильтрам
-    function getCurrentRange() {
+    // Показать информацию о выбранном диапазоне
+    function updateRangePreview() {
+        const area = parseFloat(areaInput.value);
+        if (isNaN(area) || area <= 0) {
+            rangePreviewDiv.innerHTML = '⚠️ Введите корректную площадь';
+            return;
+        }
         const floor = floorSelect.value;
         const type = typeSelect.value;
         const category = categorySelect.value;
-        if (!floor || !type || !category || !dictionaryData.length) return null;
-        const match = dictionaryData.find(item => item.floor === floor && item.type === type && item.category === category);
-        if (match) {
-            return { min: match.min_rate, max: match.max_rate, opEx: match.operating_rate !== undefined ? match.operating_rate : currentOpExRate };
+        if (!floor || !type || !category) {
+            rangePreviewDiv.innerHTML = '📌 Выберите этаж, тип помещения и товарную группу';
+            return;
         }
-        return null;
-    }
-
-    function updateRangePreview() {
-        const range = getCurrentRange();
-        if (range) {
-            rangePreview.innerHTML = `📊 Диапазон ставок (без НДС/экспл.): <strong>${range.min} — ${range.max} руб/м²</strong> | Эксплуатация: ${range.opEx} руб/м²`;
+        const entry = findRateEntry(floor, type, category, area);
+        if (entry) {
+            rangePreviewDiv.innerHTML = `✅ Найдена запись: группа площади «${entry.группа_площади}» → мин. ставка ${entry.мин_ставка} руб/м², макс. ставка ${entry.макс_ставка} руб/м² (без экспл./НДС)`;
         } else {
-            rangePreview.innerHTML = `📊 Диапазон ставок: выберите этаж, тип и товарную группу`;
+            rangePreviewDiv.innerHTML = `❌ Нет данных для выбранных параметров и площади ${area} м² (группа ${getAreaGroup(area)}). Проверьте справочник.`;
         }
-        calculateAll(); // пересчет при смене выбора
+        calculateRent(); // пересчёт при любом изменении
     }
 
-    // При изменении селекторов пересчитываем
-    floorSelect.addEventListener('change', updateRangePreview);
-    typeSelect.addEventListener('change', updateRangePreview);
-    categorySelect.addEventListener('change', updateRangePreview);
+    // Основная логика расчёта
+    function calculateRent() {
+        // Валидация площади
+        let area = parseFloat(areaInput.value);
+        if (isNaN(area) || area <= 0) {
+            resultsDiv.innerHTML = '<div class="error">Площадь должна быть больше 0</div>';
+            return;
+        }
+        const floor = floorSelect.value;
+        const type = typeSelect.value;
+        const category = categorySelect.value;
+        if (!floor || !type || !category) {
+            resultsDiv.innerHTML = '<div class="error">Пожалуйста, выберите этаж, тип помещения и товарную группу</div>';
+            return;
+        }
 
-    // --- Парсинг и загрузка файла ---
+        const entry = findRateEntry(floor, type, category, area);
+        if (!entry) {
+            resultsDiv.innerHTML = `<div class="error">Нет данных для комбинации: этаж "${floor}", тип "${type}", товар "${category}", площадь ${area} м² (группа ${getAreaGroup(area)}). Загрузите корректный справочник.</div>`;
+            return;
+        }
+
+        const minBase = entry.мин_ставка;
+        const maxBase = entry.макс_ставка;
+
+        // Итоговая ставка с эксплуатацией и НДС
+        const rateWithOpVat = (baseRate) => (baseRate + OPEX_RATE) * (1 + VAT_RATE);
+        const minFullRate = rateWithOpVat(minBase);
+        const maxFullRate = rateWithOpVat(maxBase);
+
+        // Выбор сценария (минимальная или максимальная ставка для итоговой аренды)
+        const scenario = document.querySelector('input[name="scenario"]:checked').value;
+        let selectedBase = scenario === 'min' ? minBase : maxBase;
+        let selectedFullRate = scenario === 'min' ? minFullRate : maxFullRate;
+        let monthlyRent = selectedFullRate * area;
+        let annualRent = monthlyRent * 12;
+        let leaseYears = parseFloat(leaseTermInput.value);
+        if (isNaN(leaseYears) || leaseYears < 0) leaseYears = 0;
+        let totalForecast = annualRent * leaseYears;
+
+        // Построение отображения
+        let formulaExplanation = `Формула: (базовая ставка ${selectedBase.toFixed(2)} + эксплуатация ${OPEX_RATE}) × (1 + НДС ${(VAT_RATE*100).toFixed(0)}%) = ${selectedFullRate.toFixed(2)} руб/м²`;
+        
+        let forecastHtml = '';
+        if (leaseYears > 0) {
+            forecastHtml = `<div class="result-row"><span>📅 Прогноз на срок ${leaseYears} лет (без индексации)</span><span class="result-value">${formatMoney(totalForecast)}</span></div>`;
+        }
+
+        let html = `
+            <div class="result-row"><span>📉 Минимальная ставка за м² (с экспл.+НДС)</span><span class="result-value">${formatMoney(minFullRate)}</span></div>
+            <div class="result-row"><span>📈 Максимальная ставка за м² (с экспл.+НДС)</span><span class="result-value">${formatMoney(maxFullRate)}</span></div>
+            <hr>
+            <div class="result-row"><span>🎯 Выбранный сценарий</span><span class="result-value">${scenario === 'min' ? 'Минимальная ставка' : 'Максимальная ставка'}</span></div>
+            <div class="result-row"><span>💰 Итоговая ежемесячная аренда (по сценарию)</span><span class="result-value">${formatMoney(monthlyRent)}</span></div>
+            <div class="result-row"><span>💵 Годовая арендная плата</span><span class="result-value">${formatMoney(annualRent)}</span></div>
+            ${forecastHtml}
+            <hr>
+            <div class="result-row"><span>🧮 Разбивка расчёта</span><span style="font-family: monospace;">${formulaExplanation}</span></div>
+            <div class="result-row"><span>⚙️ Эксплуатационная ставка</span><span>${formatMoney(OPEX_RATE)} / м²</span></div>
+            <div class="result-row"><span>🏷️ НДС 22%</span><span>включён в итоговые ставки</span></div>
+            <div class="result-row"><span>📋 Базовая ставка из справочника</span><span>${selectedBase.toFixed(2)} руб/м² (без экспл./НДС)</span></div>
+        `;
+        resultsDiv.innerHTML = html;
+    }
+
+    // ------------------- Загрузка и парсинг файла -------------------
+    function parseAndSetDictionary(dataArray) {
+        const mapped = [];
+        for (let row of dataArray) {
+            const floor = row.этаж || row.floor;
+            const type = row.тип || row.type;
+            const category = row.товарная_группа || row.category || row.товарнаяГруппа;
+            const areaGroup = row.группа_площади || row.areaGroup || row.диапазон;
+            let minRate = parseFloat(row.мин_ставка || row.min_rate || row.min);
+            let maxRate = parseFloat(row.макс_ставка || row.max_rate || row.max);
+            if (isNaN(minRate) || isNaN(maxRate)) continue;
+            if (!floor || !type || !category || !areaGroup) continue;
+            mapped.push({
+                этаж: String(floor).trim(),
+                тип: String(type).trim(),
+                товарная_группа: String(category).trim(),
+                группа_площади: String(areaGroup).trim(),
+                мин_ставка: minRate,
+                макс_ставка: maxRate
+            });
+        }
+        if (mapped.length === 0) throw new Error('Не найдено валидных записей. Убедитесь в колонках: этаж, тип, товарная_группа, группа_площади, мин_ставка, макс_ставка');
+        dictionaryData = mapped;
+        rebuildSelectors();
+        fileStatusDiv.innerHTML = `✅ Загружено записей: ${dictionaryData.length}. Справочник активен.`;
+        // Сбросить выбранные значения на первые опции
+        if (uniqueFloors.length) floorSelect.value = uniqueFloors[0];
+        if (uniqueTypes.length) typeSelect.value = uniqueTypes[0];
+        if (uniqueCategories.length) categorySelect.value = uniqueCategories[0];
+        updateRangePreview();
+        calculateRent();
+    }
+
     function loadFileContent(file) {
         const fileType = file.name.split('.').pop().toLowerCase();
         const reader = new FileReader();
         reader.onload = function(e) {
-            const content = e.target.result;
             try {
                 if (fileType === 'json') {
-                    const jsonData = JSON.parse(content);
-                    parseRawDataToDictionary(jsonData);
+                    const jsonData = JSON.parse(e.target.result);
+                    parseAndSetDictionary(jsonData);
                 } else if (fileType === 'csv') {
-                    Papa.parse(content, { header: true, skipEmptyLines: true, complete: (results) => {
+                    Papa.parse(e.target.result, { header: true, skipEmptyLines: true, complete: (results) => {
                         if (results.data && results.data.length) {
-                            parseRawDataToDictionary(results.data);
+                            parseAndSetDictionary(results.data);
                         } else {
-                            throw new Error('CSV пуст или неверен');
+                            throw new Error('CSV не содержит данных');
                         }
                     }});
                 } else {
@@ -424,244 +533,135 @@
         reader.readAsText(file, 'UTF-8');
     }
 
-    // Преобразование сырых данных в единый формат
-    function parseRawDataToDictionary(rawArray) {
-        const mapped = [];
-        for (let row of rawArray) {
-            // ищем поля в любом регистре / вариантах
-            const floor = row.этаж || row.floor || row.Этаж;
-            const type = row.тип || row.type || row.Тип || row.тип_помещения;
-            const category = row.категория || row.category || row.товарная_группа || row.ТоварнаяГруппа;
-            let minRate = parseFloat(row.мин_ставка || row.min_rate || row.min);
-            let maxRate = parseFloat(row.макс_ставка || row.max_rate || row.max);
-            let opRate = parseFloat(row.эксплуатационная_ставка || row.operating_rate || row.op_ex);
-            if (isNaN(minRate) || isNaN(maxRate)) continue;
-            if (!floor || !type || !category) continue;
-            mapped.push({
-                floor: String(floor).trim(),
-                type: String(type).trim(),
-                category: String(category).trim(),
-                min_rate: minRate,
-                max_rate: maxRate,
-                operating_rate: isNaN(opRate) ? undefined : opRate
-            });
-        }
-        if (mapped.length === 0) throw new Error('Не найдено валидных записей. Убедитесь в колонках: этаж, тип, категория, мин_ставка, макс_ставка');
-        dictionaryData = mapped;
-        // определяем общую эксплуатационную ставку (если есть единая) - приоритет у первой непустой
-        const anyOpEx = mapped.find(r => r.operating_rate !== undefined);
-        if (anyOpEx && anyOpEx.operating_rate) currentOpExRate = anyOpEx.operating_rate;
-        loadedFlag = true;
-        rebuildSelectors();
-        fileStatusDiv.innerHTML = `✅ Загружено записей: ${dictionaryData.length}. Эксплуатационная ставка: ${currentOpExRate} руб/м² (переопределяется в записях).`;
-        updateRangePreview();
-        // автосброс выбора для актуальности
-        floorSelect.value = uniqueFloors[0] || '';
-        typeSelect.value = uniqueTypes[0] || '';
-        categorySelect.value = uniqueCategories[0] || '';
-        updateRangePreview();
-    }
-
-    // --- Встроенный демо-справочник на основе таблиц (пример для подвала/первого этажа) ---
-    function loadDemoDictionary() {
-        const demoData = [
-            // подвал, основные помещения (Таблица 8 для группы 1-5,9 пример)
-            { floor: "Подвал", type: "основное", category: "Одежда", min_rate: 363, max_rate: 976, operating_rate: 565 },
-            { floor: "Подвал", type: "основное", category: "Украшения и часы", min_rate: 363, max_rate: 976, operating_rate: 565 },
-            { floor: "Подвал", type: "основное", category: "Обувь", min_rate: 363, max_rate: 976, operating_rate: 565 },
-            { floor: "Подвал", type: "основное", category: "Мобильная связь", min_rate: 351, max_rate: 943, operating_rate: 565 },
-            { floor: "Подвал", type: "островная", category: "Украшения и часы", min_rate: 551, max_rate: 1481, operating_rate: 565 },
-            { floor: "Подвал", type: "островная", category: "Одежда, обувь", min_rate: 551, max_rate: 1540, operating_rate: 565 },
-            { floor: "1 этаж", type: "основное", category: "Одежда", min_rate: 491, max_rate: 1322, operating_rate: 565 },
-            { floor: "1 этаж", type: "основное", category: "Аксессуары", min_rate: 491, max_rate: 1320, operating_rate: 565 },
-            { floor: "1 этаж", type: "основное", category: "Рестораны, кафе", min_rate: 488, max_rate: 1314, operating_rate: 565 },
-            { floor: "1 этаж", type: "островная", category: "Украшения и часы", min_rate: 746, max_rate: 2007, operating_rate: 565 },
-            { floor: "2 этаж", type: "основное", category: "Одежда", min_rate: 454, max_rate: 1220, operating_rate: 565 },
-            { floor: "2 этаж", type: "основное", category: "Книги", min_rate: 467, max_rate: 1256, operating_rate: 565 },
-            { floor: "2 этаж", type: "островная", category: "Украшения и часы", min_rate: 689, max_rate: 1853, operating_rate: 565 },
-            { floor: "Антресоль", type: "основное", category: "Одежда", min_rate: 454, max_rate: 1220, operating_rate: 565 }
-        ];
-        dictionaryData = demoData;
-        currentOpExRate = 565;
-        loadedFlag = true;
-        rebuildSelectors();
-        fileStatusDiv.innerHTML = `📁 Используется демо-справочник (${dictionaryData.length} записей). Загрузите свой файл для замены.`;
-        updateRangePreview();
-        // установим значения по умолчанию
-        if (uniqueFloors.length) floorSelect.value = uniqueFloors[0];
-        if (uniqueTypes.length) typeSelect.value = uniqueTypes[0];
-        if (uniqueCategories.length) categorySelect.value = uniqueCategories[0];
-        updateRangePreview();
-    }
-
-    // --- Основная логика расчёта ---
-    function calculateAll() {
-        if (!loadedFlag && dictionaryData.length === 0) {
-            resultsDiv.innerHTML = '<div class="error">⚠️ Не загружен справочник. Пожалуйста, загрузите JSON/CSV файл или используйте демо (кнопка сброса загрузит демо).</div>';
+    loadBtn.addEventListener('click', () => {
+        if (fileInput.files.length === 0) {
+            fileStatusDiv.innerHTML = '⚠️ Выберите файл .json или .csv';
             return;
         }
-        const area = parseFloat(areaInput.value);
-        const baseManual = parseFloat(baseRateManual.value);
-        const revenue = parseFloat(revenueInput.value);
-        const percentTurn = parseFloat(turnoverPercent.value);
-        const termYears = parseFloat(leaseTerm.value);
-        const inflation = parseFloat(inflationInput.value);
-        if (isNaN(area) || area <= 0) { resultsDiv.innerHTML = '<div class="error">Укажите корректную площадь > 0</div>'; return; }
-        if (isNaN(revenue) || revenue < 0) return;
-        if (isNaN(percentTurn)) return;
-        
-        const range = getCurrentRange();
-        let minRateRaw = range ? range.min : 0;
-        let maxRateRaw = range ? range.max : 0;
-        let opExRateLocal = range ? range.opEx : currentOpExRate;
-        const vat = 1.22; // НДС 22%
-        
-        // базовые ставки с эксплуатацией и НДС
-        const minRateFull = (minRateRaw + opExRateLocal) * vat;
-        const maxRateFull = (maxRateRaw + opExRateLocal) * vat;
-        
-        // сценарии
-        const scenario = document.querySelector('input[name="scenario"]:checked').value;
-        let selectedRateRaw = 0;
-        let explanation = "";
-        
-        switch(scenario) {
-            case 'min':
-                selectedRateRaw = minRateRaw;
-                explanation = `Фиксированная минимальная ставка по справочнику: ${minRateRaw} руб/м² (без НДС/экспл.)`;
-                break;
-            case 'max':
-                selectedRateRaw = maxRateRaw;
-                explanation = `Фиксированная максимальная ставка по справочнику: ${maxRateRaw} руб/м²`;
-                break;
-            case 'base':
-                if (isNaN(baseManual) || baseManual <= 0) { selectedRateRaw = minRateRaw; explanation = `Базовая ставка не указана, использована минимальная ${minRateRaw}`; }
-                else { selectedRateRaw = baseManual; explanation = `Ручная базовая ставка: ${baseManual} руб/м²`; }
-                break;
-            case 'percent':
-                if (revenue <= 0 || percentTurn <= 0) { selectedRateRaw = 0; explanation = "Некорректные данные для % от оборота"; }
-                else {
-                    const monthlyPercentAmount = revenue * (percentTurn / 100);
-                    selectedRateRaw = monthlyPercentAmount / area;
-                    explanation = `% от оборота: ${percentTurn}% от выручки ${formatMoney(revenue)} = ${formatMoney(monthlyPercentAmount)} / ${area}м² = ${selectedRateRaw.toFixed(2)} руб/м²`;
-                }
-                break;
-            case 'hybrid':
-                {
-                    let fixedPart = (isNaN(baseManual) || baseManual <= 0) ? minRateRaw : baseManual;
-                    let percentPart = 0;
-                    if (revenue > 0 && percentTurn > 0) percentPart = (revenue * (percentTurn / 100)) / area;
-                    selectedRateRaw = fixedPart + percentPart;
-                    explanation = `Гибрид: фикс ${fixedPart.toFixed(2)} + % от оборота (${percentPart.toFixed(2)}) = ${selectedRateRaw.toFixed(2)} руб/м²`;
-                }
-                break;
-            case 'index':
-                {
-                    let baseForIndex = (isNaN(baseManual) || baseManual <= 0) ? minRateRaw : baseManual;
-                    let indexedRate = baseForIndex;
-                    let totalMultiplier = 1;
-                    for (let i=1; i<=termYears; i++) totalMultiplier *= (1 + inflation/100);
-                    indexedRate = baseForIndex * totalMultiplier;
-                    selectedRateRaw = indexedRate;
-                    explanation = `Индексация на ${termYears} лет с инфляцией ${inflation}% годовых: база ${baseForIndex.toFixed(2)} → итоговая ставка ${indexedRate.toFixed(2)} руб/м² (без экспл/НДС, средний эффект)`;
-                }
-                break;
-            default: selectedRateRaw = minRateRaw;
-        }
-        
-        // итоговая ставка за м² с эксплуатацией и НДС для выбранного сценария
-        let finalRateWithOpVat = 0;
-        let monthlyRent = 0;
-        if (selectedRateRaw > 0 || scenario === 'percent' || scenario === 'hybrid') {
-            if (scenario === 'percent' || scenario === 'hybrid') {
-                // Для оборота и гибрида: добавление эксплуатации + НДС уже учтено? по логике фикс+эксплуатация+НДС, а оборотная часть - без эксплуатации? Сделаем единообразно: добавляем опер.расходы и НДС к итоговой ставке (как база аренды)
-                finalRateWithOpVat = (selectedRateRaw + opExRateLocal) * vat;
-            } else {
-                finalRateWithOpVat = (selectedRateRaw + opExRateLocal) * vat;
-            }
-            monthlyRent = finalRateWithOpVat * area;
-        } else {
-            finalRateWithOpVat = 0;
-            monthlyRent = 0;
-        }
-        
-        // Прогноз на срок (простая индексация фикс части для демонстрации)
-        let forecastHtml = '';
-        if (scenario === 'index' && termYears > 0 && !isNaN(baseManual)) {
-            let baseForecast = (isNaN(baseManual) || baseManual <= 0) ? minRateRaw : baseManual;
-            let cumulative = baseForecast;
-            forecastHtml = `<div class="result-row"><span>📅 Прогноз (индексация):</span><span>`;
-            for (let y=1; y<=Math.min(termYears,5); y++) {
-                cumulative *= (1 + inflation/100);
-                let yearRate = (cumulative + opExRateLocal) * vat;
-                forecastHtml += `Год ${y}: ${formatMoney(yearRate * area)} (${yearRate.toFixed(0)} руб/м²) • `;
-            }
-            if (termYears>5) forecastHtml += `...`;
-            forecastHtml += `</span></div>`;
-        } else if (termYears>0 && scenario !== 'percent') {
-            let staticRent = monthlyRent;
-            forecastHtml = `<div class="result-row"><span>📈 Прогноз на ${termYears} лет (без индексации):</span><span>~${formatMoney(staticRent * 12 * termYears)} за весь срок</span></div>`;
-        }
-        
-        const minTotalRent = minRateFull * area;
-        const maxTotalRent = maxRateFull * area;
-        
-        let html = `
-            <div class="result-row"><span>📉 Минимальная ставка (с экспл.+НДС)</span><span class="result-value">${formatMoney(minRateFull)} / м²</span></div>
-            <div class="result-row"><span>📈 Максимальная ставка (с экспл.+НДС)</span><span class="result-value">${formatMoney(maxRateFull)} / м²</span></div>
-            <div class="result-row"><span>💰 Итоговая мин. арендная плата (мес)</span><span class="result-value">${formatMoney(minTotalRent)}</span></div>
-            <div class="result-row"><span>💎 Итоговая макс. арендная плата (мес)</span><span class="result-value">${formatMoney(maxTotalRent)}</span></div>
-            <hr>
-            <div class="result-row"><span>🎯 Выбранный сценарий:</span><span><strong>${scenarioLabel(scenario)}</strong></span></div>
-            <div class="result-row"><span>🧮 Формула расчёта</span><span style="font-family: monospace;">${explanation}</span></div>
-            <div class="result-row"><span>⚙️ Эксплуатационные расходы (м²)</span><span>${formatMoney(opExRateLocal)}</span></div>
-            <div class="result-row"><span>🏷️ НДС 22%</span><span>включён в ставки</span></div>
-            <div class="result-row"><span>💵 Итоговая ставка по сценарию (с экспл+НДС)</span><span class="result-value">${formatMoney(finalRateWithOpVat)} руб/м²</span></div>
-            <div class="result-row"><span>📆 Ежемесячная аренда (сценарий)</span><span class="result-value">${formatMoney(monthlyRent)}</span></div>
-            ${forecastHtml}
-        `;
-        resultsDiv.innerHTML = html;
-    }
-    
-    function scenarioLabel(sc) {
-        const map = { min: "Минимальная ставка", max: "Максимальная ставка", base: "Базовая (ручной ввод)", percent: "% от оборота", hybrid: "Гибридная модель", index: "Индексация на срок" };
-        return map[sc] || sc;
-    }
-    
-    // Обработчики событий и сброс
-    function attachInputEvents() {
-        const inputs = ['area', 'baseRateManual', 'revenue', 'turnoverPercent', 'leaseTerm', 'inflation'];
-        inputs.forEach(id => document.getElementById(id).addEventListener('input', () => calculateAll()));
-        document.querySelectorAll('input[name="scenario"]').forEach(radio => radio.addEventListener('change', () => calculateAll()));
-    }
-    
-    resetBtn.addEventListener('click', () => {
-        areaInput.value = '120';
-        baseRateManual.value = '850';
-        revenueInput.value = '1500000';
-        turnoverPercent.value = '5';
-        leaseTerm.value = '5';
-        inflationInput.value = '4.5';
-        document.querySelector('input[value="min"]').checked = true;
-        if (dictionaryData.length === 0) loadDemoDictionary();
-        else {
-            if (uniqueFloors.length) floorSelect.value = uniqueFloors[0];
-            if (uniqueTypes.length) typeSelect.value = uniqueTypes[0];
-            if (uniqueCategories.length) categorySelect.value = uniqueCategories[0];
-            updateRangePreview();
-        }
-        calculateAll();
-    });
-    
-    loadBtn.addEventListener('click', () => {
-        if (fileInput.files.length === 0) { fileStatusDiv.innerHTML = '⚠️ Выберите файл'; return; }
         loadFileContent(fileInput.files[0]);
     });
-    
-    // Инициализация демо-данными
-    loadDemoDictionary();
-    attachInputEvents();
-    calculateAll();
+
+    // ------------------- Демо-справочник (встроенные данные из таблиц 8-14) -------------------
+    function buildDemoDictionary() {
+        // Создаём записи на основе реальных диапазонов из задания (основные этажи + островная)
+        const demoEntries = [];
+        // Этажи: Подвал, 1 этаж, 2 этаж, Антресоль
+        // Типы: основное, островная
+        // Группы площадей: 1-5,9 ; 6-14,9 ; 15-49,9 ; 50-149,9 ; 150-299,9 ; 300-499,9 ; 500-999,9 ; 1000-2999,9 ; 3000-4999,9 ; 5000 и более
+        const areaGroups = ["1-5,9","6-14,9","15-49,9","50-149,9","150-299,9","300-499,9","500-999,9","1000-2999,9","3000-4999,9","5000 и более"];
+        // Данные для подвала основные (Таблица 8) — усреднённо для группы одежда и украшения, для остальных аналогично
+        const basementMain = {
+            "Одежда": { min: 363, max: 976 },
+            "Обувь": { min: 363, max: 976 },
+            "Украшения и часы": { min: 363, max: 976 },
+            "Мобильная связь": { min: 351, max: 943 },
+            "Рестораны, кафе": { min: 360, max: 969 },
+            "Книги, канцтовары": { min: 373, max: 1004 }
+        };
+        // Для 1 этажа основные (Таблица 10)
+        const firstMain = {
+            "Одежда": { min: 491, max: 1322 },
+            "Украшения и часы": { min: 491, max: 1320 },
+            "Обувь": { min: 491, max: 1322 },
+            "Рестораны, кафе": { min: 488, max: 1314 },
+            "Мобильная связь": { min: 475, max: 1278 }
+        };
+        // 2 этаж основные (Таблица 12)
+        const secondMain = {
+            "Одежда": { min: 454, max: 1220 },
+            "Украшения и часы": { min: 454, max: 1220 },
+            "Обувь": { min: 454, max: 1220 },
+            "Рестораны, кафе": { min: 451, max: 1214 }
+        };
+        // Антресоль (Таблица 14) аналогична 2 этажу
+        const antresolMain = secondMain;
+
+        // Островная торговля: подвал (Таблица 9), 1 этаж (Таблица 11), 2 этаж (Таблица 13)
+        const basementIsland = {
+            "Украшения и часы": { min: 551, max: 1481 },
+            "Одежда, обувь, спорт": { min: 551, max: 1540 },
+            "Аксессуары, сумки": { min: 568, max: 1527 },
+            "Мобильная связь": { min: 533, max: 1433 },
+            "Рестораны, кафе": { min: 548, max: 1474 }
+        };
+        const firstIsland = {
+            "Украшения и часы": { min: 746, max: 2007 },
+            "Одежда, обувь, спорт": { min: 747, max: 2086 },
+            "Аксессуары, сумки": { min: 769, max: 2068 },
+            "Мобильная связь": { min: 722, max: 1942 },
+            "Рестораны, кафе": { min: 742, max: 1996 }
+        };
+        const secondIsland = {
+            "Украшения и часы": { min: 689, max: 1853 },
+            "Одежда, обувь, спорт": { min: 690, max: 1927 },
+            "Аксессуары, сумки": { min: 710, max: 1909 },
+            "Мобильная связь": { min: 667, max: 1794 },
+            "Рестораны, кафе": { min: 685, max: 1843 }
+        };
+
+        // Функция добавления записей для этажа и типа
+        function addEntries(floor, type, rateMap) {
+            for (let [cat, rates] of Object.entries(rateMap)) {
+                for (let grp of areaGroups) {
+                    demoEntries.push({
+                        этаж: floor,
+                        тип: type,
+                        товарная_группа: cat,
+                        группа_площади: grp,
+                        мин_ставка: rates.min,
+                        макс_ставка: rates.max
+                    });
+                }
+            }
+        }
+
+        addEntries("Подвал", "основное", basementMain);
+        addEntries("1 этаж", "основное", firstMain);
+        addEntries("2 этаж", "основное", secondMain);
+        addEntries("Антресоль", "основное", antresolMain);
+        addEntries("Подвал", "островная", basementIsland);
+        addEntries("1 этаж", "островная", firstIsland);
+        addEntries("2 этаж", "островная", secondIsland);
+
+        dictionaryData = demoEntries;
+        rebuildSelectors();
+        fileStatusDiv.innerHTML = `📁 Демо-справочник загружен (${dictionaryData.length} записей). Вы можете загрузить свой JSON/CSV.`;
+        // Установим значения по умолчанию
+        if (uniqueFloors.length) floorSelect.value = "1 этаж";
+        if (uniqueTypes.length) typeSelect.value = "основное";
+        if (uniqueCategories.length) categorySelect.value = "Одежда";
+        updateRangePreview();
+        calculateRent();
+    }
+
+    // События обновления
+    function bindEvents() {
+        floorSelect.addEventListener('change', () => { updateRangePreview(); calculateRent(); });
+        typeSelect.addEventListener('change', () => { updateRangePreview(); calculateRent(); });
+        categorySelect.addEventListener('change', () => { updateRangePreview(); calculateRent(); });
+        areaInput.addEventListener('input', () => { updateRangePreview(); calculateRent(); });
+        leaseTermInput.addEventListener('input', () => calculateRent());
+        document.querySelectorAll('input[name="scenario"]').forEach(radio => radio.addEventListener('change', () => calculateRent()));
+    }
+
+    resetBtn.addEventListener('click', () => {
+        areaInput.value = "85";
+        leaseTermInput.value = "5";
+        document.querySelector('input[value="min"]').checked = true;
+        if (dictionaryData.length) {
+            if (uniqueFloors.length) floorSelect.value = uniqueFloors.includes("1 этаж") ? "1 этаж" : uniqueFloors[0];
+            if (uniqueTypes.length) typeSelect.value = uniqueTypes.includes("основное") ? "основное" : uniqueTypes[0];
+            if (uniqueCategories.length) categorySelect.value = uniqueCategories.includes("Одежда") ? "Одежда" : uniqueCategories[0];
+            updateRangePreview();
+            calculateRent();
+        } else {
+            buildDemoDictionary();
+        }
+    });
+
+    // Инициализация
+    buildDemoDictionary();
+    bindEvents();
 </script>
 </body>
 </html>
